@@ -1,0 +1,22 @@
+.sidenav {
+  width: fit-content;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0px 4px 4px 0px #00000040;
+  background: #020203;
+  padding: 59px 26.5px;
+
+  nav {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    gap: 20px;
+    align-self: center;
+    margin: 197px 0 164px;
+  }
+  p {
+    writing-mode: vertical-rl;
+    rotate: 180deg;
+    color: white;
+  }
+}
