@@ -362,3 +362,114 @@ export class LineChart extends Chart {
     }
 }
 
+export class RadarChart extends Chart {
+    constructor(options) {
+        super(options);
+        this.values = this.options.dataY;
+        this.maxValue = Math.max(...this.values);
+        this.rotationOffset = Math.PI / -2;
+    };
+
+    drawRegularPolygon(ctx, x, y, sides, radius, color, style, lineWidth) {
+        if (sides < 3) return;
+        ctx.save();
+        ctx.strokeStyle = color;
+        ctx.lineWidth = lineWidth;
+        ctx.beginPath();
+        ctx.moveTo(x + radius * Math.cos(0 + this.rotationOffset), y + radius * Math.sin(0 + this.rotationOffset));
+        for (let side = 0; side <= sides; side++) {
+            ctx.lineTo(x + radius * Math.cos(side * 2 * Math.PI / sides + this.rotationOffset), y + radius * Math.sin(side * 2 * Math.PI / sides + this.rotationOffset));
+        }
+        if (style === "solid") {
+            ctx.fillStyle = color;
+            ctx.fill();
+        }
+        ctx.stroke();
+        ctx.restore();
+    }
+
+    drawIrregularPolygon(ctx, vertices) {
+        if (vertices.length < 2) return;
+        ctx.save();
+        ctx.beginPath();
+        ctx.moveTo(vertices[0].x, vertices[0].y); // Move to the first vertex
+
+        // Connect each vertex
+        for (let i = 1; i < vertices.length; i++) {
+            ctx.lineTo(vertices[i].x, vertices[i].y);
+        }
+
+        ctx.closePath(); // Close the polygon (connects last to first)
+        ctx.fillStyle = 'rgba(255, 1, 1, 0.7)';
+        ctx.fill();
+        ctx.restore();
+    }
+
+    drawGrid() {
+        var canvasActualWidth = this.canvasActualWidth;
+        const nbOfVertices = this.options.dataX.length;
+        for (let i = 0; i < nbOfVertices - 1; i++) {
+            this.drawRegularPolygon(
+                this.ctx,
+                this.canvas.width / 2,
+                this.canvas.height / 2,
+                nbOfVertices,
+                (canvasActualWidth - this.options.padding.x) / 2 - (i * (canvasActualWidth - this.options.padding.x) / 2) / nbOfVertices * 1.2,
+                "#FFFFFF",
+                "",
+                1
+            );
+        }
+
+
+    }
+
+    drawXValues() {
+        const canvasActualWidth = this.canvasActualWidth
+        const x = this.canvas.width / 2;
+        const y = this.canvas.height / 2;
+        const radius = (canvasActualWidth / 2) + 5
+        for (let i = 0; i < this.options.dataX.length; i++) {
+            const val = this.options.dataX[i];
+            this.ctx.save();
+            this.ctx.textBaseline = "middle";
+            this.ctx.textAlign = "center";
+            this.ctx.fillStyle = "#FFFFFF";
+            this.ctx.font = `${this.options.font.size} ${this.options.font.family}`
+            this.ctx.fillText(val, x + radius * Math.cos(i * 2 * Math.PI / this.options.dataX.length + this.rotationOffset), y + radius * Math.sin(i * 2 * Math.PI / this.options.dataX.length + this.rotationOffset));
+            this.ctx.restore();
+        }
+    }
+
+    drawRadarChart() {
+        var canvasActualHeight = this.canvasActualHeight;
+        var canvasActualWidth = this.canvasActualWidth;
+        var values = this.options.dataY
+        this.drawGrid()
+        let vertices = [];
+        for (let i = 0; i < values.length; i++) {
+            let val = values[i];
+            const radius = ((canvasActualWidth - this.options.padding.x) / 2) * val / this.maxValue;
+            const x = this.canvas.width/2 + radius * Math.cos(i * 2 * Math.PI / this.options.dataX.length + this.rotationOffset)
+            const y = this.canvas.height/2 + radius * Math.sin(i * 2 * Math.PI / this.options.dataX.length + this.rotationOffset)
+            vertices.push({ x: x, y: y });
+        }
+        this.drawIrregularPolygon(this.ctx, vertices);
+    }
+
+    draw() {
+        if (this.backgroundOptions.color) {
+            this.ctx.save();
+            this.ctx.fillStyle = this.backgroundOptions.color;
+            this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+            this.ctx.restore();
+        }
+        if (this.options.grid.lineWidth > 0)
+            this.drawGridLines();
+        this.drawRadarChart();
+        this.drawXValues();
+        this.drawTitle();
+        if (this.legendOptions.show)
+            this.drawLegend();
+    }
+}

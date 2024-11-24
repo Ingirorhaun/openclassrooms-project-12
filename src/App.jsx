@@ -8,12 +8,13 @@ import { IconCarbohydrates } from "./components/icons/icon-carbohydrates";
 import { IconLipids } from "./components/icons/icon-lipids";
 import BarChartComponent from "./charts/BarChart";
 import LineChartComponent from "./charts/LineChart";
+import RadarChartComponent from "./charts/RadarChart";
 
 function App() {
-  const userId = 18;
+  const userId = 12;
   const [userData, setUserData] = useState();
   const [userActivity, setUserActivity] = useState(null);
-  const [userAverageSessions, setUserAverageSessions] = useState();
+  const [userAverageSessions, setUserAverageSessions] = useState(null);
   const [userPerformance, setUserPerformance] = useState();
   const userApi = new UserApi(userId, "http://localhost:3000");
 
@@ -70,18 +71,28 @@ function App() {
                 </div>
                 <div className="left-bottom">
                   <div className="first chart">
-                  {userActivity && (
+                  {userAverageSessions && (
                     <LineChartComponent
-                      chartData={userActivity.sessions}
+                      chartData={userAverageSessions.sessions}
                       options={{
-                        title: "Activité quotidienne",
+                        title: "Durée moyenne des sessions",
                         width: 258,
                         height: 263,
                       }}
                     />
                   )}
                   </div>
-                  <div className="second chart"></div>
+                  <div className="second chart">
+                  {userPerformance && (
+                    <RadarChartComponent
+                      chartData={userPerformance}
+                      options={{
+                        width: 258,
+                        height: 263,
+                      }}
+                    />
+                  )}
+                  </div>
                   <div className="third chart"></div>
                 </div>
               </div>
