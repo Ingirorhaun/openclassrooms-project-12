@@ -23,26 +23,13 @@ export default function RadarChartComponent(props) {
         x: 24,
         y: 24,
       },
-      grid: {
-        lineWidth: 0, // in px
-      },
       lineWidth: 2,
-      smooth: true,
       dataX: dataX,
       dataY: chartData.data.map(v=>v.value).reverse(),
       colors: ["#FFFFFF"],
       font: {
         size: "14px",
         family: "Roboto",
-      },
-      title: {
-        align: "left",
-        verticalAlign: "top",
-        fill: "rgba(255,255,255,0.5)",
-        font: {
-          size: "15px",
-          family: "Roboto",
-        },
       },
       legend: {
         show: false,

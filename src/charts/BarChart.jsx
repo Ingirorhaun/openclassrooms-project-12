@@ -4,10 +4,9 @@ import { BarChart } from "./charts";
 export default function BarChartComponent(props) {
   const { options, chartData } = props;
   const canvasRef = useRef(null);
-  // const ctx = canvas.getContext('2d');
 
   useEffect(() => {
-    var myBarchart = new BarChart({
+    var barChart = new BarChart({
       canvas: canvasRef.current,
       seriesName: options.title,
       padding: {
@@ -34,17 +33,21 @@ export default function BarChartComponent(props) {
         size: "14px",
         family: "Roboto",
       },
-      titleOptions: {
+      title: {
         align: "left",
         verticalAlign: "top",
         fill: "#20253A",
         font: {
+          weight: "500",
           size: "15px",
           family: "Roboto",
         },
       },
+      legend: {
+        show: true,
+      },
     });
-    myBarchart.draw();
+    barChart.draw();
   }, [chartData, options.title]);
 
   return (

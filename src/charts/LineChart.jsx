@@ -35,6 +35,7 @@ export default function LineChartComponent(props) {
         verticalAlign: "top",
         fill: "rgba(255,255,255,0.5)",
         font: {
+          weight: "500",
           size: "15px",
           family: "Roboto",
         },
