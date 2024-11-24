@@ -9,9 +9,10 @@ import { IconLipids } from "./components/icons/icon-lipids";
 import BarChartComponent from "./charts/BarChart";
 import LineChartComponent from "./charts/LineChart";
 import RadarChartComponent from "./charts/RadarChart";
+import ProgressChartComponent from "./charts/ProgressChart";
 
 function App() {
-  const userId = 12;
+  const userId = 18;
   const [userData, setUserData] = useState();
   const [userActivity, setUserActivity] = useState(null);
   const [userAverageSessions, setUserAverageSessions] = useState(null);
@@ -71,29 +72,40 @@ function App() {
                 </div>
                 <div className="left-bottom">
                   <div className="first chart">
-                  {userAverageSessions && (
-                    <LineChartComponent
-                      chartData={userAverageSessions.sessions}
-                      options={{
-                        title: "Durée moyenne des sessions",
-                        width: 258,
-                        height: 263,
-                      }}
-                    />
-                  )}
+                    {userAverageSessions && (
+                      <LineChartComponent
+                        chartData={userAverageSessions.sessions}
+                        options={{
+                          title: "Durée moyenne des sessions",
+                          width: 258,
+                          height: 263,
+                        }}
+                      />
+                    )}
                   </div>
                   <div className="second chart">
-                  {userPerformance && (
-                    <RadarChartComponent
-                      chartData={userPerformance}
-                      options={{
-                        width: 258,
-                        height: 263,
-                      }}
-                    />
-                  )}
+                    {userPerformance && (
+                      <RadarChartComponent
+                        chartData={userPerformance}
+                        options={{
+                          width: 258,
+                          height: 263,
+                        }}
+                      />
+                    )}
                   </div>
-                  <div className="third chart"></div>
+                  <div className="third chart">
+                    {userData?.todayScore && (
+                      <ProgressChartComponent
+                        chartData={userData.todayScore}
+                        options={{
+                          title: "Score",
+                          width: 258,
+                          height: 263,
+                        }}
+                      />
+                    )}
+                  </div>
                 </div>
               </div>
               <div className="flex-col right-col">

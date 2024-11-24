@@ -83,10 +83,9 @@ class Chart {
      * Splits the text into lines to fit in the canvas
      * @returns {Array} An array of lines
      */
-    getTextLines() {
+    getTextLines(text, maxWidth) {
         const textLines = [];
-        const words = this.options.seriesName.split(" ");
-        const maxWidth = this.canvas.width - this.options.padding.x * 3;
+        const words = text.split(" ");
         let line = words[0];
         for (var i = 1; i < words.length; i++) {
             var word = words[i];
@@ -109,7 +108,7 @@ class Chart {
         this.ctx.textBaseline = "top";
         this.ctx.textAlign = this.titleOptions.align;
         this.ctx.fillStyle = this.titleOptions.fill;
-        this.ctx.font = `${this.titleOptions.font.size} ${this.titleOptions.font.family}`;
+        this.ctx.font = `${this.titleOptions.font.weight} ${this.titleOptions.font.size} ${this.titleOptions.font.family}`;
         let xPos = this.canvas.width / 2;
         if (this.titleOptions.align === "left") {
             xPos = 10 + this.options.padding.x;
@@ -117,7 +116,7 @@ class Chart {
         if (this.titleOptions.align === "right") {
             xPos = this.canvas.width - this.options.padding.x - 10;
         }
-        const lines = this.getTextLines();
+        const lines = this.getTextLines(this.options.seriesName, this.canvas.width - this.options.padding.x * 3);
         for (let i = 0; i < lines.length; i++) {
             const line = lines[i];
             this.ctx.fillText(line, xPos, this.titleOptions.verticalAlign === "top" ? this.options.padding.y + (i * parseInt(this.titleOptions.font.size) * 1.2) : this.canvas.height);
@@ -450,8 +449,8 @@ export class RadarChart extends Chart {
         for (let i = 0; i < values.length; i++) {
             let val = values[i];
             const radius = ((canvasActualWidth - this.options.padding.x) / 2) * val / this.maxValue;
-            const x = this.canvas.width/2 + radius * Math.cos(i * 2 * Math.PI / this.options.dataX.length + this.rotationOffset)
-            const y = this.canvas.height/2 + radius * Math.sin(i * 2 * Math.PI / this.options.dataX.length + this.rotationOffset)
+            const x = this.canvas.width / 2 + radius * Math.cos(i * 2 * Math.PI / this.options.dataX.length + this.rotationOffset)
+            const y = this.canvas.height / 2 + radius * Math.sin(i * 2 * Math.PI / this.options.dataX.length + this.rotationOffset)
             vertices.push({ x: x, y: y });
         }
         this.drawIrregularPolygon(this.ctx, vertices);
@@ -464,12 +463,83 @@ export class RadarChart extends Chart {
             this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
             this.ctx.restore();
         }
-        if (this.options.grid.lineWidth > 0)
-            this.drawGridLines();
         this.drawRadarChart();
         this.drawXValues();
         this.drawTitle();
         if (this.legendOptions.show)
             this.drawLegend();
+    }
+}
+
+export class ProgressChart extends Chart {
+    constructor(options) {
+        super(options);
+        // Chart properties
+        this.centerX = this.canvas.width / 2;
+        this.centerY = this.canvas.height / 2;
+        const radius = this.canvas.width > this.canvas.height ? this.canvas.height * 0.35 : this.canvas.width *0.35;
+        this.radius = radius; // Radius of the circular progress bar
+        this.startAngle = -Math.PI / 2; // Start from top
+        this.labelText = options.labelText;
+        this.progress = options.data;
+    }
+
+    #drawBackgroundCircle() {
+        // Background circle
+        this.ctx.beginPath();
+        this.ctx.arc(this.centerX, this.centerY, this.radius, 0, 2 * Math.PI);
+        this.ctx.lineWidth = this.options.lineWidth;
+        this.ctx.fillStyle = this.colors[1];
+        this.ctx.fill();
+    }
+
+    #drawProgressCircle() {
+        // Progress circle
+        this.ctx.beginPath();
+        this.ctx.arc(
+            this.centerX,
+            this.centerY,
+            this.radius,
+            this.startAngle,
+            this.startAngle - this.progress * 2 * Math.PI,
+            true
+        );
+        this.ctx.lineWidth = this.options.lineWidth;
+        this.ctx.strokeStyle = this.colors[0];
+        this.ctx.lineCap = 'round'; // Rounded ends
+        this.ctx.stroke();
+    }
+
+    #drawText() {
+        // Percentage text
+        this.ctx.font = `${this.options.font.weight} ${this.options.font.size} ${this.options.font.family}`;
+        this.ctx.fillStyle = '#333';
+        this.ctx.textAlign = 'center';
+        this.ctx.textBaseline = 'middle';
+        this.ctx.fillText(`${Math.round(this.progress * 100)}% `, this.centerX, this.centerY - 10);
+
+        // Label text
+        this.ctx.font = `${this.options.font.weight} 16px ${this.options.font.family}`;
+        this.ctx.fillStyle = '#777';
+        const textLines = this.getTextLines(this.labelText, this.radius - 20);
+        console.log(this.labelText)
+        for (let i = 0; i < textLines.length; i++) {
+            const line = textLines[i];
+            console.log(line)
+            this.ctx.fillText(line, this.centerX, this.centerY + 16 + 20*i);
+        }
+    }
+
+    draw() {
+        if (this.backgroundOptions.color) {
+            this.ctx.save();
+            this.ctx.fillStyle = this.backgroundOptions.color;
+            this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+            this.ctx.restore();
+        }
+        this.#drawBackgroundCircle();
+        this.#drawProgressCircle();
+        this.#drawText();
+        this.drawTitle();
     }
 }
