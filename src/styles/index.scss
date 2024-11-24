@@ -100,6 +100,7 @@ main {
     .left-top {
       height: 320px;
       width: 835px;
+      border-radius: 5px;
     }
 
     .left-bottom {
@@ -107,6 +108,7 @@ main {
         width: 258px;
         height: 263px;
         border-radius: 5px;
+        overflow: hidden;
       }
     }
   }
