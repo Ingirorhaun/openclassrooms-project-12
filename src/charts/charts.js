@@ -9,7 +9,6 @@ class Chart {
         this.legendOptions = options.legend;
         this.backgroundOptions = options.background;
 
-        // this.nbOfSeries = this.options.dataY[0].constructor === Object ? Object.keys(this.options.dataY[0]).length : 1;
         this.canvasActualHeight = this.canvas.height - this.options.padding.y * 2 - this.canvas.height * 0.33;
         this.canvasActualWidth = this.canvas.width - this.options.padding.x * 2;
     }
@@ -148,6 +147,20 @@ class Chart {
             this.ctx.restore();
         }
     }
+
+    getClosestIndex(n, arr) {
+        return arr.reduce((closestIndex, currentValue, currentIndex) =>
+            Math.abs(currentValue - n) < Math.abs(arr[closestIndex] - n) ? currentIndex : closestIndex
+            , 0);
+    }
+
+    debounce(fn, time) {
+        let timer = null;
+        return (...args) => {
+            clearTimeout(timer);
+            timer = setTimeout(() => fn(...args), time);
+        };
+    }
 }
 
 export class BarChart extends Chart {
@@ -155,6 +168,9 @@ export class BarChart extends Chart {
         super(options);
         this.nbOfSeries = this.options.dataY[0].constructor === Object ? Object.keys(this.options.dataY[0]).length : 1;
         this.maxValue = Math.max(...this.options.dataY.flatMap(Object.values));
+        this.handleMouseMove = this.handleMouseMove.bind(this);
+        this.debounceMouseMove = this.debounce(this.handleMouseMove, 200)
+        this.highlightedArea = []
     }
 
     drawBar(
@@ -177,7 +193,7 @@ export class BarChart extends Chart {
 
     drawBars() {
         var canvasActualHeight = this.canvasActualHeight;
-        var canvasActualWidth = this.canvasActualWidth - this.canvasActualWidth / 10;
+        var canvasActualWidth = this.canvasActualWidth - this.canvasActualWidth / 10 - this.options.bars.width;
         var values = this.options.dataY;
         const totalNbOfValues = this.options.dataY.flatMap(Object.values).length;
         var numberOfBars = values.length;
@@ -212,10 +228,20 @@ export class BarChart extends Chart {
 
     }
 
+    getXValuesPos() {
+        const barGroupLength = ((this.options.bars.width * this.nbOfSeries) + (this.options.bars.space * (this.nbOfSeries - 1)))
+        let xPos = this.options.padding.x + barGroupLength / 2;
+        const gap = ((this.canvasActualWidth - this.canvasActualWidth / 10 + this.options.padding.x - barGroupLength*2) / (this.options.dataY.length - 1))
+        const xValuesPos = [];
+        for (let i = 0; i < this.options.dataX.length; i++) {
+            xValuesPos.push(xPos);
+            xPos += gap;
+        }
+        return xValuesPos;
+    }
+
     drawXValues() {
-        let canvasActualWidth = this.canvasActualWidth
-        let xPos = this.options.padding.x + ((this.options.bars.width * this.nbOfSeries) + (this.options.bars.space * (this.nbOfSeries - 1))) / 2;
-        const gap = (canvasActualWidth - xPos * 2 - this.options.padding.x) / (this.options.dataX.length - 1);
+        const xValuesPos = this.getXValuesPos()
         for (let i = 0; i < this.options.dataX.length; i++) {
             const val = this.options.dataX[i];
             this.ctx.save();
@@ -223,21 +249,112 @@ export class BarChart extends Chart {
             this.ctx.textAlign = "center";
             this.ctx.fillStyle = "#9B9EAC";
             this.ctx.font = `${this.options.font.size} ${this.options.font.family}`
-            this.ctx.translate(xPos, this.canvas.height - this.options.padding.y);
+            this.ctx.translate(xValuesPos[i], this.canvas.height - this.options.padding.y);
             this.ctx.fillText(val, 0, 0);
             this.ctx.restore();
-            xPos += gap;
         }
     }
 
+    highlightArea(x0, y0, x1, y1) {
+        this.ctx.save();
+        this.ctx.beginPath();
+        this.ctx.fillStyle = "rgba(196, 196, 196, 0.5)";
+        this.ctx.fillRect(x0, y0, x1 - x0, y1);
+        this.ctx.restore();
+    }
+
+    showTooltip(x, y, text) {
+        let width = 39;
+        let height = 63;
+        if (y + height > this.canvasActualHeight + this.canvas.height * 0.33) {
+            y = y - height;
+        }
+        //draw a rectangle, then draw text on it
+        this.ctx.save();
+        this.ctx.beginPath();
+        this.ctx.fillStyle = "#E60000";
+        // this.ctx.
+        this.ctx.fillRect(x + 15, y, width, height);
+        //draw text
+        this.ctx.fillStyle = "white";
+        this.ctx.textBaseline = "middle";
+        this.ctx.textAlign = "center";
+        this.ctx.font = `${this.options.font.weight} 7px ${this.options.font.family}`;
+        const textLines = this.getTextLines(text, width);
+        for (let i = 0; i < textLines.length; i++) {
+            const line = textLines[i];
+            this.ctx.fillText(line, x + 15 + width / 2, y + height / (textLines.length + 1) * (i + 1));
+        }
+        this.ctx.restore();
+    }
+
+    handleMouseMove(e) {
+        const xValuesPos = this.getXValuesPos()
+        const rect = this.canvas.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        if (y < this.canvas.height * 0.33 || y > this.canvasActualHeight + this.canvas.height * 0.33) {
+            this.canvas.style.cursor = "default";
+            this.tooltipText = "";
+            this.highlightedArea = []
+            this.draw();
+            return
+        }
+        // const barSize = this.options.bars.width * this.nbOfSeries > this.canvasActualWidth ? this.canvasActualWidth / this.options.dataX.length : this.options.bars.width;
+        // const gap = (this.canvasActualWidth - barSize * this.nbOfSeries * this.options.dataX.length - this.options.bars.space * (this.nbOfSeries - 1)) / (this.options.dataX.length - 1);
+        const index = this.getClosestIndex(x, xValuesPos)
+        if (x >= this.options.padding.x && x <= this.canvasActualWidth - this.canvasActualWidth / 10 + this.options.padding.x) {
+            this.canvas.style.cursor = "pointer";
+            this.tooltipText = `${this.options.dataY[index].kilogram}kg ${this.options.dataY[index].calories}kCal`;
+
+            const y0 = this.canvas.height * 0.33;
+            const y1 = this.canvas.height - this.options.padding.y * 2 - this.canvas.height * 0.33
+            let x0, x1
+            if (index === 0) {
+                x0 = this.options.padding.x
+                x1 = Math.floor((xValuesPos[index] + xValuesPos[index + 1]) / 2)
+            } else if (index === xValuesPos.length - 1) {
+                x0 = Math.floor((xValuesPos[index - 1] + xValuesPos[index]) / 2)
+                x1 = this.canvasActualWidth - this.canvasActualWidth / 10 + this.options.padding.x
+            } else {
+                x0 = Math.floor((xValuesPos[index - 1] + xValuesPos[index]) / 2) - Math.floor((xValuesPos[index - 1] - xValuesPos[index])*0.2)
+                x1 = Math.floor((xValuesPos[index] + xValuesPos[index + 1]) / 2) + Math.floor((xValuesPos[index] - xValuesPos[index + 1])*0.2)
+            }
+
+            this.highlightedArea = [x0, y0, x1, y1, x, y]
+        } else {
+            this.highlightedArea = []
+            this.canvas.style.cursor = "default";
+            this.tooltipText = "";
+        }
+        this.draw();
+    }
+
+    createEventListener() {
+        this.canvas.addEventListener("mousemove", this.debounceMouseMove);
+    }
+
     draw() {
+        //erase anything already drawn on the canvas
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        //remove existing event listener
+        this.canvas.removeEventListener("mousemove", this.debounceMouseMove);
+
+        if (this.highlightedArea.length > 0) {
+            this.highlightArea(...this.highlightedArea);
+        }
         if (this.options.grid.lineWidth > 0)
             this.drawGridLines();
         this.drawBars();
         this.drawTitle();
         this.drawXValues();
+        if (this.tooltipText) {
+            this.showTooltip(this.highlightedArea[4], this.highlightedArea[5], this.tooltipText);
+        }
         if (this.legendOptions.show)
             this.drawLegend();
+        this.createEventListener();
+        this.highlightedArea = [];
     }
 }
 
@@ -477,7 +594,7 @@ export class ProgressChart extends Chart {
         // Chart properties
         this.centerX = this.canvas.width / 2;
         this.centerY = this.canvas.height / 2;
-        const radius = this.canvas.width > this.canvas.height ? this.canvas.height * 0.35 : this.canvas.width *0.35;
+        const radius = this.canvas.width > this.canvas.height ? this.canvas.height * 0.35 : this.canvas.width * 0.35;
         this.radius = radius; // Radius of the circular progress bar
         this.startAngle = -Math.PI / 2; // Start from top
         this.labelText = options.labelText;
@@ -522,11 +639,9 @@ export class ProgressChart extends Chart {
         this.ctx.font = `${this.options.font.weight} 16px ${this.options.font.family}`;
         this.ctx.fillStyle = '#777';
         const textLines = this.getTextLines(this.labelText, this.radius - 20);
-        console.log(this.labelText)
         for (let i = 0; i < textLines.length; i++) {
             const line = textLines[i];
-            console.log(line)
-            this.ctx.fillText(line, this.centerX, this.centerY + 16 + 20*i);
+            this.ctx.fillText(line, this.centerX, this.centerY + 16 + 20 * i);
         }
     }
 
