@@ -20,9 +20,9 @@ export default function BarChartComponent(props) {
       },
       grid: {
         color: "#DEDEDE",
-        style: "dashed", //solid or dashed
-        lineWidth: 1, // in px
-        drawSeriesVerticalLine: false, // true or false
+        style: "dashed",
+        lineWidth: 1,
+        drawSeriesVerticalLine: false,
       },
       dataX: chartData.map((p) => new Date(p.day).getDate()),
       dataY: chartData.map((p) => {

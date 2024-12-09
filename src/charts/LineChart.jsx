@@ -29,7 +29,7 @@ export default function LineChartComponent(props) {
         y: 24,
       },
       grid: {
-        lineWidth: 0, // in px
+        lineWidth: 0,
       },
       lineWidth: 2,
       smooth: true,
