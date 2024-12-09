@@ -11,7 +11,17 @@ export default function LineChartComponent(props) {
   });
 
   useEffect(() => {
-    var lineChart = new LineChart({
+    const gradient = canvasRef.current
+      .getContext("2d")
+      .createLinearGradient(
+        0,
+        0,
+        canvasRef.current.width,
+        canvasRef.current.height
+      );
+    gradient.addColorStop(0, "rgba(255, 255, 255, 0.4)");
+    gradient.addColorStop(1, "rgba(255, 255, 255, 1)");
+    const lineChart = new LineChart({
       canvas: canvasRef.current,
       seriesName: options.title,
       padding: {
@@ -25,7 +35,7 @@ export default function LineChartComponent(props) {
       smooth: true,
       dataX: dataX,
       dataY: chartData.map((p) => p.sessionLength),
-      colors: ["#FFFFFF"],
+      colors: [gradient],
       font: {
         weight: "500",
         size: "14px",
