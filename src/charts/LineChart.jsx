@@ -27,6 +27,7 @@ export default function LineChartComponent(props) {
       dataY: chartData.map((p) => p.sessionLength),
       colors: ["#FFFFFF"],
       font: {
+        weight: "500",
         size: "14px",
         family: "Roboto",
       },

@@ -28,7 +28,7 @@ export default function RadarChartComponent(props) {
       dataY: chartData.data.map(v=>v.value).reverse(),
       colors: ["#FFFFFF"],
       font: {
-        size: "14px",
+        size: "12px",
         family: "Roboto",
       },
       legend: {
