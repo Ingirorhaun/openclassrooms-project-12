@@ -364,7 +364,11 @@ export class LineChart extends Chart {
         this.handleMouseMove = this.handleMouseMove.bind(this);
         this.highlightPoint = this.highlightPoint.bind(this);
         this.debounceMouseMove = this.debounce(this.handleMouseMove, 50)
-        this.highlightedPoint = null;
+        this.highlightedPoint = {
+            index: null,
+            x: null,
+            y: null,
+        };
     }
     maxValue = Math.max(...this.options.dataY);
     canvasActualWidth = this.canvas.width - this.options.padding.x;
@@ -404,7 +408,6 @@ export class LineChart extends Chart {
         var canvasActualHeight = this.canvasActualHeight;
         var canvasActualWidth = this.canvas.width;
         var values = this.options.dataY
-        const drawHighlightedPoint = { x: null, y: null };
         const f = 0.3;
         const t = .8;
         const gap = canvasActualWidth / (this.options.dataX.length - 1);
@@ -422,9 +425,9 @@ export class LineChart extends Chart {
         let dy2 = 0;
         let preP = { x: x0, y: y0 };
 
-        if (this.highlightedPoint === 0) {
-            drawHighlightedPoint.x = x0;
-            drawHighlightedPoint.y = y0;
+        if (this.highlightedPoint.index === 0) {
+            this.highlightedPoint.x = x0;
+            this.highlightedPoint.y = y0;
         }
         for (let i = 0; i < values.length; i++) {
             const curP = { x: x0 + (gap * i), y: canvasActualHeight * (1 - values[i] / this.maxValue) + this.canvas.height * 0.33 };
@@ -441,9 +444,9 @@ export class LineChart extends Chart {
                 dy2 = 0;
             }
             this.ctx.bezierCurveTo(preP.x - dx1, preP.y - dy1, curP.x + dx2, curP.y + dy2, curP.x, curP.y);
-            if (this.highlightedPoint === i) {
-                drawHighlightedPoint.x = curP.x;
-                drawHighlightedPoint.y = curP.y;
+            if (this.highlightedPoint.index === i) {
+                this.highlightedPoint.x = curP.x;
+                this.highlightedPoint.y = curP.y;
 
             }
             dx1 = dx2;
@@ -453,9 +456,7 @@ export class LineChart extends Chart {
 
         this.ctx.stroke()
         this.ctx.restore()
-        if (drawHighlightedPoint.x !== null && drawHighlightedPoint.y) {
-            this.highlightPoint(drawHighlightedPoint.x, drawHighlightedPoint.y)
-        }
+
     }
 
     getXValuesPos() {
@@ -490,8 +491,13 @@ export class LineChart extends Chart {
     highlightPoint(x, y) {
         this.ctx.save();
         this.ctx.beginPath();
-        this.ctx.fillStyle = "white";
+        this.ctx.fillStyle = this.options.colors[0];
+        //draw a circle
         this.ctx.arc(x, y, 5, 0, 2 * Math.PI);
+        this.ctx.fill();
+        //draw another bigger circle around the previous one
+        this.ctx.fillStyle = "rgba(255, 255, 255, 0.2)";
+        this.ctx.arc(x, y, 10, 0, 2 * Math.PI);
         this.ctx.fill();
         this.ctx.restore();
     }
@@ -500,7 +506,7 @@ export class LineChart extends Chart {
         const width = 39;
         const height = 25;
         const gap = 15;
-        let x = this.canvas.width / (this.options.dataX.length - 1) * this.highlightedPoint + gap;
+        let x = this.canvas.width / (this.options.dataX.length - 1) * this.highlightedPoint.index + gap;
         let y = this.canvasActualHeight * (1 - this.options.dataY[index] / this.maxValue) + this.canvas.height * 0.33
         if (y + height > this.canvasActualHeight + this.canvas.height * 0.33) {
             y = y - height;
@@ -534,17 +540,17 @@ export class LineChart extends Chart {
         if (y < this.canvas.height * 0.33 || y > this.canvasActualHeight + this.canvas.height * 0.33) {
             this.canvas.style.cursor = "default";
             this.tooltipText = "";
-            this.highlightedPoint = null;
+            this.highlightedPoint.index = null;
             this.draw();
             return
         }
         const index = this.getClosestIndex(x, xValuesPos)
-        if (x > 0 && x <= this.canvasActualWidth) {
+        if (x > 0 && x <= this.canvas.width) {
             this.canvas.style.cursor = "pointer";
             this.tooltipText = `${this.options.dataY[index]} min`;
-            this.highlightedPoint = index;
+            this.highlightedPoint.index = index;
         } else {
-            this.highlightedPoint = null;
+            this.highlightedPoint.index = null;
             this.canvas.style.cursor = "default";
             this.tooltipText = "";
         }
@@ -561,16 +567,19 @@ export class LineChart extends Chart {
         //remove existing event listener
         this.canvas.removeEventListener("mousemove", this.debounceMouseMove);
 
-
-
         if (this.backgroundOptions.color) {
             this.ctx.save();
             this.ctx.fillStyle = this.backgroundOptions.color;
             this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+            if (this.highlightedPoint.index !== null) {
+                this.ctx.fillStyle = "rgba(0, 0, 0, 0.1)";
+                this.ctx.fillRect(this.highlightedPoint.index * this.canvas.width / (this.options.dataX.length - 1), 0, this.canvas.width, this.canvas.height)
+            }
             this.ctx.restore();
         }
         if (this.options.grid.lineWidth > 0)
             this.drawGridLines();
+        
         if (this.options.smooth) {
             this.drawSmoothLineChart();
         } else {
@@ -578,16 +587,17 @@ export class LineChart extends Chart {
         }
         this.drawTitle();
         this.drawXValues();
+        if (this.highlightedPoint.x != null && this.highlightedPoint.y != null) {
+            this.highlightPoint(this.highlightedPoint.x, this.highlightedPoint.y)
+        }
         if (this.tooltipText) {
-            this.showTooltip(this.highlightedPoint, this.tooltipText);
+            this.showTooltip(this.highlightedPoint.index, this.tooltipText);
         }
         if (this.legendOptions.show)
             this.drawLegend();
         this.createEventListener();
-        if (this.highlightedPoint) {
-            this.highlightedPoint = null;
-        }
-
+        
+        this.highlightedPoint.index = null;
     }
 }
 
@@ -671,7 +681,6 @@ export class RadarChart extends Chart {
     }
 
     drawRadarChart() {
-        var canvasActualHeight = this.canvasActualHeight;
         var canvasActualWidth = this.canvasActualWidth;
         var values = this.options.dataY
         this.drawGrid()
