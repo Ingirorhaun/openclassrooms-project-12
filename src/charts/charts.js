@@ -169,7 +169,7 @@ export class BarChart extends Chart {
         this.nbOfSeries = this.options.dataY[0].constructor === Object ? Object.keys(this.options.dataY[0]).length : 1;
         this.maxValue = Math.max(...this.options.dataY.flatMap(Object.values));
         this.handleMouseMove = this.handleMouseMove.bind(this);
-        this.debounceMouseMove = this.debounce(this.handleMouseMove, 200)
+        this.debounceMouseMove = this.debounce(this.handleMouseMove, 50)
         this.highlightedArea = []
     }
 
@@ -231,7 +231,7 @@ export class BarChart extends Chart {
     getXValuesPos() {
         const barGroupLength = ((this.options.bars.width * this.nbOfSeries) + (this.options.bars.space * (this.nbOfSeries - 1)))
         let xPos = this.options.padding.x + barGroupLength / 2;
-        const gap = ((this.canvasActualWidth - this.canvasActualWidth / 10 + this.options.padding.x - barGroupLength*2) / (this.options.dataY.length - 1))
+        const gap = ((this.canvasActualWidth - this.canvasActualWidth / 10 + this.options.padding.x - barGroupLength * 2) / (this.options.dataY.length - 1))
         const xValuesPos = [];
         for (let i = 0; i < this.options.dataX.length; i++) {
             xValuesPos.push(xPos);
@@ -317,8 +317,8 @@ export class BarChart extends Chart {
                 x0 = Math.floor((xValuesPos[index - 1] + xValuesPos[index]) / 2)
                 x1 = this.canvasActualWidth - this.canvasActualWidth / 10 + this.options.padding.x
             } else {
-                x0 = Math.floor((xValuesPos[index - 1] + xValuesPos[index]) / 2) - Math.floor((xValuesPos[index - 1] - xValuesPos[index])*0.2)
-                x1 = Math.floor((xValuesPos[index] + xValuesPos[index + 1]) / 2) + Math.floor((xValuesPos[index] - xValuesPos[index + 1])*0.2)
+                x0 = Math.floor((xValuesPos[index - 1] + xValuesPos[index]) / 2) - Math.floor((xValuesPos[index - 1] - xValuesPos[index]) * 0.2)
+                x1 = Math.floor((xValuesPos[index] + xValuesPos[index + 1]) / 2) + Math.floor((xValuesPos[index] - xValuesPos[index + 1]) * 0.2)
             }
 
             this.highlightedArea = [x0, y0, x1, y1, x, y]
@@ -359,6 +359,13 @@ export class BarChart extends Chart {
 }
 
 export class LineChart extends Chart {
+    constructor(options) {
+        super(options);
+        this.handleMouseMove = this.handleMouseMove.bind(this);
+        this.highlightPoint = this.highlightPoint.bind(this);
+        this.debounceMouseMove = this.debounce(this.handleMouseMove, 50)
+        this.highlightedPoint = null;
+    }
     maxValue = Math.max(...this.options.dataY);
     canvasActualWidth = this.canvas.width - this.options.padding.x;
 
@@ -397,6 +404,7 @@ export class LineChart extends Chart {
         var canvasActualHeight = this.canvasActualHeight;
         var canvasActualWidth = this.canvas.width;
         var values = this.options.dataY
+        const drawHighlightedPoint = { x: null, y: null };
         const f = 0.3;
         const t = .8;
         const gap = canvasActualWidth / (this.options.dataX.length - 1);
@@ -414,7 +422,11 @@ export class LineChart extends Chart {
         let dy2 = 0;
         let preP = { x: x0, y: y0 };
 
-        for (let i = 1; i < values.length; i++) {
+        if (this.highlightedPoint === 0) {
+            drawHighlightedPoint.x = x0;
+            drawHighlightedPoint.y = y0;
+        }
+        for (let i = 0; i < values.length; i++) {
             const curP = { x: x0 + (gap * i), y: canvasActualHeight * (1 - values[i] / this.maxValue) + this.canvas.height * 0.33 };
             const nexP = { x: x0 + gap * (i + 1), y: canvasActualHeight * (1 - values[i + 1] / this.maxValue) + this.canvas.height * 0.33 };
             if (!nexP.y)
@@ -429,6 +441,11 @@ export class LineChart extends Chart {
                 dy2 = 0;
             }
             this.ctx.bezierCurveTo(preP.x - dx1, preP.y - dy1, curP.x + dx2, curP.y + dy2, curP.x, curP.y);
+            if (this.highlightedPoint === i) {
+                drawHighlightedPoint.x = curP.x;
+                drawHighlightedPoint.y = curP.y;
+
+            }
             dx1 = dx2;
             dy1 = dy2;
             preP = curP;
@@ -436,13 +453,26 @@ export class LineChart extends Chart {
 
         this.ctx.stroke()
         this.ctx.restore()
+        if (drawHighlightedPoint.x !== null && drawHighlightedPoint.y) {
+            this.highlightPoint(drawHighlightedPoint.x, drawHighlightedPoint.y)
+        }
+    }
+
+    getXValuesPos() {
+        let canvasActualWidth = this.canvasActualWidth
+        let xPos = this.options.padding.x;
+        const gap = (canvasActualWidth - xPos) / (this.options.dataX.length - 1)
+        const xValuesPos = [];
+        for (let i = 0; i < this.options.dataX.length; i++) {
+            xValuesPos.push(xPos);
+            xPos += gap;
+        }
+        return xValuesPos;
     }
 
 
     drawXValues() {
-        let canvasActualWidth = this.canvasActualWidth
-        let xPos = this.options.padding.x;
-        const gap = (canvasActualWidth - xPos) / (this.options.dataX.length - 1)
+        const xValuesPos = this.getXValuesPos();
         for (let i = 0; i < this.options.dataX.length; i++) {
             const val = this.options.dataX[i];
             this.ctx.save();
@@ -450,14 +480,89 @@ export class LineChart extends Chart {
             this.ctx.textAlign = "center";
             this.ctx.fillStyle = "rgba(255,255,255,0.5)";
             this.ctx.font = `${this.options.font.size} ${this.options.font.family}`
-            this.ctx.translate(xPos, this.canvas.height - this.options.padding.y + 5);
+            this.ctx.translate(xValuesPos[i], this.canvas.height - this.options.padding.y + 5);
             this.ctx.fillText(val, 0, 0);
             this.ctx.restore();
-            xPos += gap;
         }
     }
 
+
+    highlightPoint(x, y) {
+        this.ctx.save();
+        this.ctx.beginPath();
+        this.ctx.fillStyle = "white";
+        this.ctx.arc(x, y, 5, 0, 2 * Math.PI);
+        this.ctx.fill();
+        this.ctx.restore();
+    }
+
+    showTooltip(index, text) {
+        const width = 39;
+        const height = 25;
+        const gap = 15;
+        let x = this.canvas.width / (this.options.dataX.length - 1) * this.highlightedPoint + gap;
+        let y = this.canvasActualHeight * (1 - this.options.dataY[index] / this.maxValue) + this.canvas.height * 0.33
+        if (y + height > this.canvasActualHeight + this.canvas.height * 0.33) {
+            y = y - height;
+        }
+        if (x + width > this.canvasActualWidth) {
+            x = x - width - (2 * gap);
+        }
+        //draw a rectangle
+        this.ctx.save();
+        this.ctx.beginPath();
+        this.ctx.fillStyle = "white";
+        this.ctx.fillRect(x, y, width, height);
+        //draw text on it
+        this.ctx.fillStyle = "black";
+        this.ctx.textBaseline = "middle";
+        this.ctx.textAlign = "center";
+        this.ctx.font = `${this.options.font.weight} 8px ${this.options.font.family}`;
+        const textLines = this.getTextLines(text, width);
+        for (let i = 0; i < textLines.length; i++) {
+            const line = textLines[i];
+            this.ctx.fillText(line, x + width / 2, y + height / (textLines.length + 1) * (i + 1));
+        }
+        this.ctx.restore();
+    }
+
+    handleMouseMove(e) {
+        const xValuesPos = this.getXValuesPos()
+        const rect = this.canvas.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        if (y < this.canvas.height * 0.33 || y > this.canvasActualHeight + this.canvas.height * 0.33) {
+            this.canvas.style.cursor = "default";
+            this.tooltipText = "";
+            this.highlightedPoint = null;
+            this.draw();
+            return
+        }
+        const index = this.getClosestIndex(x, xValuesPos)
+        if (x > 0 && x <= this.canvasActualWidth) {
+            this.canvas.style.cursor = "pointer";
+            this.tooltipText = `${this.options.dataY[index]} min`;
+            this.highlightedPoint = index;
+        } else {
+            this.highlightedPoint = null;
+            this.canvas.style.cursor = "default";
+            this.tooltipText = "";
+        }
+        this.draw();
+    }
+
+    createEventListener() {
+        this.canvas.addEventListener("mousemove", this.debounceMouseMove);
+    }
+
     draw() {
+        //erase anything already drawn on the canvas
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        //remove existing event listener
+        this.canvas.removeEventListener("mousemove", this.debounceMouseMove);
+
+
+
         if (this.backgroundOptions.color) {
             this.ctx.save();
             this.ctx.fillStyle = this.backgroundOptions.color;
@@ -473,8 +578,16 @@ export class LineChart extends Chart {
         }
         this.drawTitle();
         this.drawXValues();
+        if (this.tooltipText) {
+            this.showTooltip(this.highlightedPoint, this.tooltipText);
+        }
         if (this.legendOptions.show)
             this.drawLegend();
+        this.createEventListener();
+        if (this.highlightedPoint) {
+            this.highlightedPoint = null;
+        }
+
     }
 }
 
