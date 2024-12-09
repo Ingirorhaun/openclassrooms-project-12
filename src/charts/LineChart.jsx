@@ -35,6 +35,7 @@ export default function LineChartComponent(props) {
       smooth: true,
       dataX: dataX,
       dataY: chartData.map((p) => p.sessionLength),
+      measurementUnits: ["min"],
       colors: [gradient],
       font: {
         weight: "500",

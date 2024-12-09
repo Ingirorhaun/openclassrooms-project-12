@@ -84,7 +84,7 @@ class Chart {
      */
     getTextLines(text, maxWidth) {
         const textLines = [];
-        const words = text.split(" ");
+        const words = text.trim().split(" ");
         let line = words[0];
         for (var i = 1; i < words.length; i++) {
             var word = words[i];
@@ -127,13 +127,15 @@ class Chart {
 
     drawLegend() {
         let cur = 0;
-        for (let key of Object.keys(this.options.dataY[0])) {
-            const text = key;
+        const entries = Object.entries(this.options.dataY[0]);
+        for (let i = 0; i < entries.length; i++) {
+            const [key,] = entries[i];
+            const text = `${key} (${this.options.measurementUnits[i]})`;
             this.ctx.save();
             this.ctx.textBaseline = "top";
             this.ctx.textAlign = "left";
-            this.ctx.fillStyle = "#74798c";
-            this.ctx.font = `${this.options.font.size} ${this.options.font.family}`
+            this.ctx.fillStyle = this.options.legend.color;
+            this.ctx.font = `${this.options.legend.font.weight} ${this.options.legend.font.size} ${this.options.legend.font.family}`
             const textMetrics = this.ctx.measureText(text);
             const xPos = this.canvasActualWidth - textMetrics.actualBoundingBoxRight - textMetrics.actualBoundingBoxLeft - cur;
             this.ctx.translate(xPos, this.options.padding.y);
@@ -279,7 +281,7 @@ export class BarChart extends Chart {
         this.ctx.fillStyle = "white";
         this.ctx.textBaseline = "middle";
         this.ctx.textAlign = "center";
-        this.ctx.font = `${this.options.font.weight} 7px ${this.options.font.family}`;
+        this.ctx.font = `${this.options.font.weight} 9px ${this.options.font.family}`;
         const textLines = this.getTextLines(text, width);
         for (let i = 0; i < textLines.length; i++) {
             const line = textLines[i];
@@ -300,12 +302,14 @@ export class BarChart extends Chart {
             this.draw();
             return
         }
-        // const barSize = this.options.bars.width * this.nbOfSeries > this.canvasActualWidth ? this.canvasActualWidth / this.options.dataX.length : this.options.bars.width;
-        // const gap = (this.canvasActualWidth - barSize * this.nbOfSeries * this.options.dataX.length - this.options.bars.space * (this.nbOfSeries - 1)) / (this.options.dataX.length - 1);
         const index = this.getClosestIndex(x, xValuesPos)
         if (x >= this.options.padding.x && x <= this.canvasActualWidth - this.canvasActualWidth / 10 + this.options.padding.x) {
             this.canvas.style.cursor = "pointer";
-            this.tooltipText = `${this.options.dataY[index].kilogram}kg ${this.options.dataY[index].calories}kCal`;
+
+            this.tooltipText = ""
+            Object.entries(this.options.dataY[index]).forEach(([, value], i) => {
+                this.tooltipText += `${value} ${this.options.measurementUnits[i]} `;
+            });
 
             const y0 = this.canvas.height * 0.33;
             const y1 = this.canvas.height - this.options.padding.y * 2 - this.canvas.height * 0.33
@@ -547,7 +551,7 @@ export class LineChart extends Chart {
         const index = this.getClosestIndex(x, xValuesPos)
         if (x > 0 && x <= this.canvas.width) {
             this.canvas.style.cursor = "pointer";
-            this.tooltipText = `${this.options.dataY[index]} min`;
+            this.tooltipText = `${this.options.dataY[index]} ${this.options.measurementUnits[0]}`;
             this.highlightedPoint.index = index;
         } else {
             this.highlightedPoint.index = null;
@@ -579,7 +583,7 @@ export class LineChart extends Chart {
         }
         if (this.options.grid.lineWidth > 0)
             this.drawGridLines();
-        
+
         if (this.options.smooth) {
             this.drawSmoothLineChart();
         } else {
@@ -596,7 +600,7 @@ export class LineChart extends Chart {
         if (this.legendOptions.show)
             this.drawLegend();
         this.createEventListener();
-        
+
         this.highlightedPoint.index = null;
     }
 }

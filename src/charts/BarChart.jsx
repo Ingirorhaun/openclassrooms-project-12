@@ -26,10 +26,12 @@ export default function BarChartComponent(props) {
       },
       dataX: chartData.map((p) => new Date(p.day).getDate()),
       dataY: chartData.map((p) => {
-        return { kilogram: p.kilogram, calories: p.calories };
+        return { "Poids": p.kilogram, "Calories brûlées": p.calories };
       }),
+      measurementUnits: ["kg", "Kcal"],
       colors: ["#282d30", "#e60000"],
       font: {
+        weight: "500",
         size: "14px",
         family: "Roboto",
       },
@@ -45,6 +47,12 @@ export default function BarChartComponent(props) {
       },
       legend: {
         show: true,
+        color: "#74798c",
+        font: {
+          weight: "500",
+          size: "14px",
+          family: "Roboto",
+        },
       },
     });
     barChart.draw();
