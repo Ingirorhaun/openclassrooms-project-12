@@ -5,17 +5,17 @@ export class UserApi {
     }
     /**
      * @typedef {Object} UserData
-     * @param {Number} id
-     * @param {Object} userInfos
-     * @param {String} userInfos.firstName
-     * @param {String} userInfos.lastName
-     * @param {Number} userInfos.age
-     * @param {Number} todayScore
-     * @param {Object} keyData
-     * @param {Number} keyData.calorieCount
-     * @param {Number} keyData.proteinCount
-     * @param {Number} keyData.carbohydrateCount
-     * @param {Number} keyData.lipidCount
+     * @property {Number} id
+     * @property {Object} userInfos
+     * @property {String} userInfos.firstName
+     * @property {String} userInfos.lastName
+     * @property {Number} userInfos.age
+     * @property {Number} todayScore
+     * @property {Object} keyData
+     * @property {Number} keyData.calorieCount
+     * @property {Number} keyData.proteinCount
+     * @property {Number} keyData.carbohydrateCount
+     * @property {Number} keyData.lipidCount
      */
     /**
      * 
@@ -28,11 +28,11 @@ export class UserApi {
     }
     /**
      * @typedef {Object} UserActivity
-     * @param {Number} userId
-     * @param {Object} sessions
-     * @param {Array} sessions.sessions
-     * @param {Number} sessions.sessions.day
-     * @param {Number} sessions.sessions.sessionLength
+     * @property {Number} userId
+     * @property {Object} sessions
+     * @property {Array} sessions.sessions
+     * @property {Number} sessions.sessions.day
+     * @property {Number} sessions.sessions.sessionLength
      */
     /**
      *
@@ -45,11 +45,11 @@ export class UserApi {
     }
     /**
      * @typedef {Object} UserAverageSessions
-     * @param {Number} userId
-     * @param {Object} sessions
-     * @param {Array} sessions.sessions
-     * @param {Number} sessions.sessions.day
-     * @param {Number} sessions.sessions.sessionLength
+     * @property {Number} userId
+     * @property {Object} sessions
+     * @property {Array} sessions.sessions
+     * @property {Number} sessions.sessions.day
+     * @property {Number} sessions.sessions.sessionLength
      */
     /**
      *
@@ -63,11 +63,11 @@ export class UserApi {
 
     /**
      * @typedef {Object} UserPerformance
-     * @param {Number} userId
-     * @param {Object} kind
-     * @param {Array} data
-     * @param {Number} data.value
-     * @param {Number} data.kind
+     * @property {Number} userId
+     * @property {Object} kind
+     * @property {Array} data
+     * @property {Number} data.value
+     * @property {Number} data.kind
     */
     /**
      *
