@@ -12,7 +12,7 @@ import RadarChartComponent from "./charts/RadarChart";
 import ProgressChartComponent from "./charts/ProgressChart";
 
 function App() {
-  const userId = 18;
+  const userId = 12;
   const [userData, setUserData] = useState();
   const [userActivity, setUserActivity] = useState(null);
   const [userAverageSessions, setUserAverageSessions] = useState(null);
@@ -59,7 +59,7 @@ function App() {
             <div className="container">
               <div className="flex-col">
                 <div className="left-top chart">
-                  {userActivity && (
+                  {userActivity?.sessions && (
                     <BarChartComponent
                       chartData={userActivity.sessions}
                       options={{
@@ -72,7 +72,7 @@ function App() {
                 </div>
                 <div className="left-bottom">
                   <div className="first chart">
-                    {userAverageSessions && (
+                    {userAverageSessions?.sessions && (
                       <LineChartComponent
                         chartData={userAverageSessions.sessions}
                         options={{

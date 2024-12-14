@@ -1,0 +1,57 @@
+#barChart {
+  .chart-title {
+    fill: #20253a;
+    font-size: 15px;
+  }
+  text {
+    font-family: "Roboto";
+    font-size: 14px;
+    font-weight: 500;
+    color: #9b9eac;
+  }
+
+  .x-axis {
+    color: #dedede;
+  }
+
+  .y-axis {
+    color: #dedede;
+    > path,
+    line {
+      stroke-width: 0;
+    }
+  }
+  .grid {
+    line {
+      stroke: #e5e5e5;
+      stroke-dasharray: 3 2;
+    }
+  }
+  .legend {
+    fill: #74798c;
+    
+  }
+  .hover-rect{
+    fill: rgba(196, 196, 196, 0.5);
+  }
+
+  .tooltip{
+    height: 63px;
+    width: 39px;
+    opacity: 0;
+    background-color: #e60000;
+    position: absolute;
+    padding: 10px;
+    pointer-events: none;
+    font-size: 9px;
+    text-align: center;
+    color: #fff;
+    font-weight: 500;
+    line-height: 31px;
+  }
+  .bar-group{
+    path{
+        pointer-events: none;
+    }
+  }
+}

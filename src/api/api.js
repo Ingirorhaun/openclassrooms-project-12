@@ -32,7 +32,8 @@ export class UserApi {
      * @property {Object} sessions
      * @property {Array} sessions.sessions
      * @property {Number} sessions.sessions.day
-     * @property {Number} sessions.sessions.sessionLength
+     * @property {Number} sessions.sessions.kilogram
+     * @property {Number} sessions.sessions.calories
      */
     /**
      *
