@@ -117,15 +117,8 @@ const BarChartComponent = ({ options, chartData }) => {
       .attr("class", "bar-group")
       .attr("transform", (d, i) => `translate(${i * space}, 0)`);
 
-    // Add a transparent background rect to each group for consistent hover area
-    // d3.select(this)
-    //       .append("rect")
-    //       .attr("class", "hover-rect")
-    //       .style('pointer-events', 'none')
-    //       .attr("x", -20)
-    //       .attr("y", 0)
-    //       .attr("width", barWidth * 2 + gap + 40)
-    //       .attr("height", height)
+    // Add a transparent background rect to each group and set up mouseover events
+    
     barGroups
       .append("rect")
       .attr("class", "hover-area")
@@ -183,23 +176,6 @@ const BarChartComponent = ({ options, chartData }) => {
         );
       })
       .style("fill", color("Calories brûlées (kCal)"));
-
-    // Add the hover behavior to the group
-    // barGroups
-    //   .on("mouseover", function (event, d) {
-    //     tooltip.transition().duration(200).style("opacity", 0.9);
-    //     tooltip
-    //       .html(`${d.kilogram}kg<br/>${d.calories}kCal`)
-    //       .style("pointer-events", "none")
-    //       .style("left", event.pageX + 10 + "px")
-    //       .style("top", event.pageY - 30 + "px");
-    //     //add a colored rect as group background
-    //   })
-    //   .on("mouseout", function () {
-    //     tooltip.transition().duration(500).style("opacity", 0);
-    //     //removve colored rect
-    //     d3.select(this).select(".hover-rect").remove();
-    // });
 
     // Add X axis at bottom of chart
     svg
