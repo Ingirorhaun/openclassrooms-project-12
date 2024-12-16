@@ -1,0 +1,18 @@
+#radarChart {
+    background: #282D30;
+    text {
+        font-family: "Roboto";
+        fill:#FFF;
+        font-size: 12px;
+        font-weight: 500;
+    }
+    .level{
+        fill:none;
+        stroke: #FFF;
+        stroke-width: 1px;
+    }
+    .shape {
+        fill: rgba(255, 1, 1, 0.7);
+
+    }
+}
