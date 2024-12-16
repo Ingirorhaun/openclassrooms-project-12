@@ -41,4 +41,8 @@
   .tooltip-text {
     font-size: 8px;
   }
+  .highlight-overlay {
+    fill: rgba(0, 0, 0, 0.1);
+    pointer-events: none;
+  }
 }

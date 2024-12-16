@@ -1,7 +1,7 @@
 # Openclassrooms JavaScript React Developer project #12: Develop a Dashboard for Analytics with React
 
 ## Description
-A React-based project featuring a custom implementation of a data visualization library which includes custom chart types (bar, line, radar, progress) and configurable chart parameters with partially customizable styling options.
+A React-based project featuring custom charts made using the D3 library.
 
 ## Installation
 1. Clone the repository:

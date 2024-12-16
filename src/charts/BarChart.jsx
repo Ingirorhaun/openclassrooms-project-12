@@ -1,7 +1,10 @@
 import { useEffect, useRef } from "react";
 import * as d3 from "d3";
 
-// Returns path data for a rectangle with rounded top corners
+// Helper function to create SVG path data for rectangles with rounded top corners
+// x, y: top-left corner coordinates
+// width, height: rectangle dimensions
+// radius: corner radius
 function upperRoundedRect(x, y, width, height, radius) {
   return (
     "M" +
@@ -34,15 +37,22 @@ function upperRoundedRect(x, y, width, height, radius) {
   );
 }
 
+/**
+ * BarChart Component - renders a bar chart using D3.js
+ * @param {Object} options - - Configuration options for the chart (width, height, title)
+ * @param {Array} chartData - Array of data points for the chart
+ * @returns {JSX.Element} - The rendered BarChartComponent
+ */ 
 const BarChartComponent = ({ options, chartData }) => {
   const ref = useRef(null);
 
-  //initialize variables
+  //format input data
   const data = chartData.map((d) => ({
     day: new Date(d.day).getDate(),
     kilogram: d.kilogram,
     calories: d.calories,
   }));
+
   const margin = {
     top: 112,
     right: 70,
@@ -51,11 +61,12 @@ const BarChartComponent = ({ options, chartData }) => {
   };
   const width = options.width - margin.left - margin.right;
   const height = options.height - margin.top - margin.bottom;
-  const barWidth = 7;
-  const gap = 8;
-  const legendSpacing = 52;
+  const barWidth = 7; //width of individual bars
+  const gap = 8; //gap between paired bars
+  const legendSpacing = 52; //spacing between legend items
 
-  var color = d3
+  // Define color scale for weight and calories bars
+  const color = d3
     .scaleOrdinal()
     .domain(["Poids (kg)", "Calories brûlées (kCal)"])
     .range(["#282D30", "#E60000"]);
@@ -65,12 +76,14 @@ const BarChartComponent = ({ options, chartData }) => {
     .scalePoint()
     .range([0, width])
     .padding(0.0135 * data.length);
+  
   const yScale = d3.scaleLinear().range([height, 0]);
 
   useEffect(() => {
-    //remove any existing element
+    // Remove any existing element
     d3.select(ref.current).selectAll("*").remove();
-    // Create svg object
+
+    // Create main svg object
     var svg = d3
       .select(ref.current)
       .append("svg")
@@ -79,20 +92,20 @@ const BarChartComponent = ({ options, chartData }) => {
       .append("g")
       .attr("transform", `translate(${margin.left}, ${margin.top})`);
 
-    //create the tooltip element
+    // Create the tooltip element
     const tooltip = d3
       .select("#barChart")
       .append("div")
       .attr("class", "tooltip");
 
-    //scale axis based on data
+    // Set domain for scales based on data
     xScale.domain(data.map((d) => d.day));
     yScale.domain([
       0,
       Math.max(...data.flatMap((d) => [d.kilogram, d.calories])),
     ]);
 
-    //draw horizontal grid lines
+    // Draw horizontal grid lines
     svg
       .append("g")
       .attr("class", "grid")
@@ -105,7 +118,7 @@ const BarChartComponent = ({ options, chartData }) => {
       .attr("y1", (d) => yScale(d))
       .attr("y2", (d) => yScale(d));
 
-    //draw bars
+    // Calculate space between bar groups
     const space = (width - barWidth * 2 - gap) / (data.length - 1);
 
     // Create groups for pairs of bars
@@ -118,7 +131,6 @@ const BarChartComponent = ({ options, chartData }) => {
       .attr("transform", (d, i) => `translate(${i * space}, 0)`);
 
     // Add a transparent background rect to each group and set up mouseover events
-    
     barGroups
       .append("rect")
       .attr("class", "hover-area")
@@ -194,6 +206,7 @@ const BarChartComponent = ({ options, chartData }) => {
       .call(
         d3
           .axisRight(yScale)
+          // Add three tick marks at the top, middle, and bottom of the chart
           .tickValues([
             yScale.domain()[0],
             yScale.domain()[1] / 2,
@@ -211,7 +224,7 @@ const BarChartComponent = ({ options, chartData }) => {
         `translate(${0 - margin.left + 42}, ${0 - margin.top + 42})`
       );
 
-    // ==== Add legend
+    // Add legend
     const legend = svg
       .selectAll(".legend")
       .data(color.domain())
@@ -223,6 +236,7 @@ const BarChartComponent = ({ options, chartData }) => {
       .append("text")
       .text((d) => d)
       .each(function (d, i) {
+        //calculate position for legend items
         const textWidth = this.getBoundingClientRect().width;
         const xPosition =
           width -
@@ -236,7 +250,7 @@ const BarChartComponent = ({ options, chartData }) => {
           "transform",
           `translate(${xPosition}, ${yPosition})`
         );
-        //Move the rect creation out of the each() function by selecting the parent node
+        // Move the rect creation out of the each() function by selecting the parent node
         d3.select(this.parentNode)
           .append("rect")
           .attr("width", 8)

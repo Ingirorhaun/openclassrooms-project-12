@@ -1,10 +1,17 @@
 import { useEffect, useRef } from "react";
 import * as d3 from "d3";
 
+/**
+ * LineChart Component - Renders a line chart using D3.js
+ * @param {Object} options - Configuration options for the chart (width, height, title)
+ * @param {Array} chartData - Array of data points containing day and sessionLength
+ * @returns {JSX.Element} - The rendered LineChartComponent
+ */
 export default function LineChartComponent({ options, chartData }) {
   const ref = useRef(null);
   const dayLabels = ["L", "M", "M", "J", "V", "S", "D"];
 
+  //format input data
   const data = chartData.map((p) => {
     return { x: p.day, y: p.sessionLength };
   });
@@ -21,8 +28,8 @@ export default function LineChartComponent({ options, chartData }) {
   useEffect(() => {
     //remove any existing element
     d3.select(ref.current).selectAll("*").remove();
-    // append the svg object to the body of the page
-    var svg = d3
+    // Create the main svg element
+    const svg = d3
       .select(ref.current)
       .append("svg")
       .attr("width", width + margin.left + margin.right)
@@ -30,17 +37,15 @@ export default function LineChartComponent({ options, chartData }) {
       .append("g")
       .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-    // Create the highlight rectangle
+    // Create the semi transparent highlight rectangle
     const highlightRect = svg
       .append("rect")
       .attr("class", "highlight-overlay")
-      .style("fill", "rgba(0, 0, 0, 0.1)")
-      .style("pointer-events", "none") // Prevent the overlay from intercepting mouse events
       .attr("height", options.height)
       .attr("y", 0 - margin.top)
       .attr("opacity", 0);
 
-    // Add X line
+    // Add X scale for the chart line
     const xLine = d3
       .scalePoint()
       .domain(data.map((i) => i.x))
@@ -65,7 +70,7 @@ export default function LineChartComponent({ options, chartData }) {
       .domain([0, Math.max(...data.map((i) => i.y))])
       .range([height, 0]);
 
-    // Create the circle that travels along the curve of chart
+    // Create a circle that travels along the curve of chart on hover
     const focusCircle = svg.append("g").style("opacity", 0);
 
     //outer circle
@@ -84,7 +89,7 @@ export default function LineChartComponent({ options, chartData }) {
       .attr("cx", 0)
       .attr("cy", 0);
 
-    // Create the text that travels along the curve of chart
+    // Create the tooltip element
     const tooltipBgHeight = 25;
     const tooltipBgWidth = 39;
     const tooltip = svg
@@ -92,6 +97,7 @@ export default function LineChartComponent({ options, chartData }) {
       .attr("class", "tooltip")
       .style("opacity", 0);
 
+    // Add tooltip background
     const tooltipBG = tooltip
       .append("rect")
       .attr("class", "tooltip-bg")
@@ -100,6 +106,7 @@ export default function LineChartComponent({ options, chartData }) {
       .attr("x", -tooltipBgWidth / 2 + 15)
       .attr("y", -tooltipBgHeight / 2 - 20);
 
+    // Add tooltip text
     const tooltipText = tooltip
       .append("text")
       .attr("class", "tooltip-text")
@@ -108,7 +115,7 @@ export default function LineChartComponent({ options, chartData }) {
       .attr("x", 15)
       .attr("y", -20);
 
-    // Create gradient for the line
+    // Create gradient definition for the line (css gradients don't work on svg)
     svg
       .append("defs")
       .append("linearGradient")
@@ -131,7 +138,7 @@ export default function LineChartComponent({ options, chartData }) {
         return d.color;
       });
 
-    // Add the line
+    // Draw the chart line
     svg
       .append("path")
       .datum(data)
@@ -157,6 +164,7 @@ export default function LineChartComponent({ options, chartData }) {
         "transform",
         `translate(${0 - margin.left + 34}, ${0 - margin.top + 46})`
       )
+      // Manually add line breaks
       .append("tspan")
       .text(options.title.split(" ").slice(0, 3).join(" ")) // First line
       .attr("x", 0)
@@ -166,7 +174,7 @@ export default function LineChartComponent({ options, chartData }) {
       .attr("x", 0)
       .attr("dy", "1.2em"); // Vertical spacing between lines
 
-    // Create a rect on top of the svg area to get the mouse position
+    // Create an invisible rect on top of the svg area to handle mouse interactions
     svg
       .append("rect")
       .style("fill", "none")
@@ -174,8 +182,8 @@ export default function LineChartComponent({ options, chartData }) {
       .attr("class", "overlay")
       .attr("width", width)
       .attr("height", height)
-      .on("mouseover", mouseover)
-      .on("mousemove", mousemove)
+      .on("mouseover", mouseover) //triggers when the mouse pointer enters an element or any of its children
+      .on("mousemove", mousemove) //triggers each time the mouse pointer is moved when it is over an element
       .on("mouseout", mouseout);
 
     function mouseover() {
@@ -185,12 +193,13 @@ export default function LineChartComponent({ options, chartData }) {
     }
 
     function mousemove(e) {
-      // Get mouse x position and find nearest domain value
+      // Calculate the nearest data point based on mouse position
       const xPos = d3.pointer(e)[0];
       const domain = xAxis.domain();
       const range = xAxis.range();
       const rangePoints = d3.range(range[0], range[1], xAxis.step());
-      //check for the last point
+
+      // Handle edge case for last point
       let index;
       let xOffset = 15;
       if (xPos >= range[1]) {
@@ -222,6 +231,7 @@ export default function LineChartComponent({ options, chartData }) {
           .attr("width", width - xLine(selectedData.x));
       }
     }
+
     function mouseout() {
       focusCircle.style("opacity", 0);
       tooltip.style("opacity", 0);

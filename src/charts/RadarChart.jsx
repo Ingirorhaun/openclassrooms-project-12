@@ -1,8 +1,13 @@
 import { useEffect, useRef } from "react";
 import * as d3 from "d3";
 
-export default function RadarChartComponent(props) {
-  const { options, chartData } = props;
+/**
+ * RadarChart Component - Renders a radar chart using D3.js
+ * @param {Object} options - Configuration options for the chart (width, height, title)
+ * @param {Object} chartData - Data for the radar chart
+ * @returns {JSX.Element} - The rendered RadarChartComponent
+ */
+export default function RadarChartComponent({ options, chartData }) {
   const ref = useRef(null);
 
   const translatedNames = {
