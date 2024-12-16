@@ -18,20 +18,6 @@ export default function LineChartComponent({ options, chartData }) {
   const width = options.width - margin.left - margin.right;
   const height = options.height - margin.top - margin.bottom;
 
-  function createHighlightRect(svg) {
-    // Remove any existing highlight first
-    svg.selectAll(".highlight-overlay").remove();
-
-    // Create the highlight rectangle
-    return svg
-      .append("rect")
-      .attr("class", "highlight-overlay")
-      .style("fill", "rgba(0, 0, 0, 0.1)")
-      .style("pointer-events", "none") // Prevent it from intercepting mouse events
-      .attr("height", options.height)
-      .attr("y", 0 - margin.top);
-  }
-
   useEffect(() => {
     //remove any existing element
     d3.select(ref.current).selectAll("*").remove();
