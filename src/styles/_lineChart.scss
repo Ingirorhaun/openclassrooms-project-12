@@ -1,0 +1,44 @@
+#lineChart {
+  background-color: #ff0000;
+  .chart-title {
+    fill: rgba(255, 255, 255, 0.5);
+    font-size: 15px;
+    line-height: 24px;
+  }
+  text {
+    font-family: "Roboto";
+    font-size: 14px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.5);
+  }
+  .x-axis {
+    text {
+      line-height: 24px;
+      font-size: 12;
+    }
+    path,
+    line {
+      stroke-width: 0;
+    }
+  }
+  .line {
+    fill: none;
+    stroke: url("#line-gradient"); /* declared in LineChart.jsx*/
+    stroke-width: 2px;
+  }
+  .focus-circle-outer {
+    fill: rgba(255, 255, 255, 0.2);
+    stroke-width: 0;
+    
+  }
+  .focus-circle-inner {
+    fill: #FFF;
+    stroke-width: 0;
+  }
+  .tooltip-bg {
+    fill: #FFF;
+  }
+  .tooltip-text {
+    font-size: 8px;
+  }
+}
