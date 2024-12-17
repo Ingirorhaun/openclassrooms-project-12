@@ -21,14 +21,21 @@ function App() {
 
   useEffect(() => {
     async function fetchUserData() {
-      await userApi.getUserById().then((data) => setUserData(data));
-      await userApi.getUserActivity().then((data) => setUserActivity(data));
-      await userApi
-        .getUserAverageSessions()
-        .then((data) => setUserAverageSessions(data));
-      await userApi
-        .getUserPerformance()
-        .then((data) => setUserPerformance(data));
+      try {
+        const [userData, activityData, sessionsData, performanceData] =
+          await Promise.all([
+            userApi.getUserById(),
+            userApi.getUserActivity(),
+            userApi.getUserAverageSessions(),
+            userApi.getUserPerformance(),
+          ]);
+        setUserData(userData);
+        setUserActivity(activityData);
+        setUserAverageSessions(sessionsData);
+        setUserPerformance(performanceData);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
     }
     async function preloadFont() {
       const font = new FontFace(

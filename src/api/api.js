@@ -22,9 +22,19 @@ export class UserApi {
      * @returns {UserData}
      */
     async getUserById() {
-        const response = await fetch(`${this.url}/user/${this.userId}`);
-        const data = await response.json();
-        return data.data;
+        try {
+            const response = await fetch(`${this.url}/user/${this.userId}`);
+            if (!response.ok) {
+                throw new UserApiError(`Failed to fetch user data: ${response.status}`, response);
+            }
+            const data = await response.json();
+            return data.data;
+        } catch (error) {
+            if (error instanceof UserApiError) {
+                throw error;
+            }
+            throw new UserApiError('Error fetching user data', error);
+        }
     }
     /**
      * @typedef {Object} UserActivity
@@ -40,9 +50,19 @@ export class UserApi {
      * @returns {UserActivity}
      */
     async getUserActivity() {
-        const response = await fetch(`${this.url}/user/${this.userId}/activity`);
-        const data = await response.json();
-        return data.data;
+        try {
+            const response = await fetch(`${this.url}/user/${this.userId}/activity`);
+            if (!response.ok) {
+                throw new UserApiError(`Failed to fetch activity data: ${response.status}`, response);
+            }
+            const data = await response.json();
+            return data.data;
+        } catch (error) {
+            if (error instanceof UserApiError) {
+                throw error;
+            }
+            throw new UserApiError('Error fetching user activity data', error);
+        }
     }
     /**
      * @typedef {Object} UserAverageSessions
@@ -57,9 +77,19 @@ export class UserApi {
      * @returns {UserAverageSessions}
      */
     async getUserAverageSessions() {
-        const response = await fetch(`${this.url}/user/${this.userId}/average-sessions`);
-        const data = await response.json();
-        return data.data;
+        try {
+            const response = await fetch(`${this.url}/user/${this.userId}/average-sessions`);
+            if (!response.ok) {
+                throw new UserApiError(`Failed to fetch average sessions data: ${response.status}`, response);
+            }
+            const data = await response.json();
+            return data.data;
+        } catch (error) {
+            if (error instanceof UserApiError) {
+                throw error;
+            }
+            throw new UserApiError('Error fetching user average sessions data', error);
+        }
     }
 
     /**
@@ -75,8 +105,26 @@ export class UserApi {
      * @returns {UserPerformance}
      */
     async getUserPerformance() {
-        const response = await fetch(`${this.url}/user/${this.userId}/performance`);
-        const data = await response.json();
-        return data.data;
+        try {
+            const response = await fetch(`${this.url}/user/${this.userId}/performance`);
+            if (!response.ok) {
+                throw new UserApiError(`Failed to fetch performance data: ${response.status}`, response);
+            }
+            const data = await response.json();
+            return data.data;
+        } catch (error) {
+            if (error instanceof UserApiError) {
+                throw error;
+            }
+            throw new UserApiError('Error fetching user performance data', error);
+        }
+    }
+}
+
+class UserApiError extends Error {
+    constructor(message, cause) {
+        super(message);
+        this.name = 'UserApiError';
+        this.cause = cause;
     }
 }
