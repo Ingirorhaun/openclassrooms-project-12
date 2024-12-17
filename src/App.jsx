@@ -37,16 +37,7 @@ function App() {
         console.error("Error fetching data:", error);
       }
     }
-    async function preloadFont() {
-      const font = new FontFace(
-        "Roboto",
-        "url('https://fonts.gstatic.com/s/roboto/v32/KFOmCnqEu92Fr1Mu72xKOzY.woff2') format('woff2')"
-      );
-      await font.load();
-      document.fonts.add(font);
-    }
     async function init() {
-      await preloadFont();
       await fetchUserData();
     }
     init();
