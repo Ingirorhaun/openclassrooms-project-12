@@ -1,0 +1,30 @@
+#progressChart {
+    text {
+        font-family: "Roboto";
+        font-size: 15px;
+        font-weight: 500;
+    }
+    .bg-circle {
+        fill: #FFF;
+    }
+
+    .progress-arc {
+        fill: #FF0000;
+        stroke-width: 0;
+    }
+
+    .chart-title {
+        line-height: 24px;
+    }
+
+    .progress-text {
+        text-anchor: middle;
+        font-size: 26px;
+        line-height: 26px;
+        font-weight: 700;
+    }
+
+    .progress-subtext {
+        fill: #74798c;
+    }
+}
