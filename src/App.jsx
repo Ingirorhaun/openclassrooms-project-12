@@ -18,7 +18,7 @@ function App() {
   const [userAverageSessions, setUserAverageSessions] = useState(null);
   const [userPerformance, setUserPerformance] = useState();
   const [error, setError] = useState(null);
-  const userApi = new UserApi(userId, "http://localhost:3000");
+  const userApi = new UserApi(userId, "http://localhost:3000", false);
 
   useEffect(() => {
     async function fetchUserData() {

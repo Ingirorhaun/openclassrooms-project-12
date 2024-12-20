@@ -1,7 +1,14 @@
+
 export class UserApi {
-    constructor(userId, url) {
+    /**
+     * @param {Number} userId
+     * @param {String} url
+     * @param {Boolean} useMockedData
+     */
+    constructor(userId, url, useMockedData) {
         this.url = url;
         this.userId = userId;
+        this.useMockedData = useMockedData;
     }
     /**
      * @typedef {Object} UserData
@@ -22,6 +29,16 @@ export class UserApi {
      * @returns {UserData}
      */
     async getUserById() {
+        // Use mocked data
+        if (this.useMockedData) {
+            const { USER_MAIN_DATA } = await import("./mock.js");
+            const userMainData = USER_MAIN_DATA.find((user) => user.id === this.userId);
+            if (userMainData.score) {
+                userMainData.todayScore = userMainData.score;
+            }
+            return userMainData;
+        }
+        // Use API data
         try {
             const response = await fetch(`${this.url}/user/${this.userId}`);
             if (!response.ok) {
@@ -53,6 +70,12 @@ export class UserApi {
      * @returns {UserActivity}
      */
     async getUserActivity() {
+        // Use mocked data
+        if (this.useMockedData) {
+            const { USER_ACTIVITY } = await import("./mock.js");
+            return USER_ACTIVITY.find((user) => user.userId === this.userId);
+        }
+        // Use API data
         try {
             const response = await fetch(`${this.url}/user/${this.userId}/activity`);
             if (!response.ok) {
@@ -80,6 +103,12 @@ export class UserApi {
      * @returns {UserAverageSessions}
      */
     async getUserAverageSessions() {
+        // Use mocked data
+        if (this.useMockedData) {
+            const { USER_AVERAGE_SESSIONS } = await import("./mock.js");
+            return USER_AVERAGE_SESSIONS.find((user) => user.userId === this.userId);
+        }
+        // Use API data
         try {
             const response = await fetch(`${this.url}/user/${this.userId}/average-sessions`);
             if (!response.ok) {
@@ -108,6 +137,12 @@ export class UserApi {
      * @returns {UserPerformance}
      */
     async getUserPerformance() {
+        // Use mocked data
+        if (this.useMockedData) {
+            const { USER_PERFORMANCE } = await import("./mock.js");
+            return USER_PERFORMANCE.find((user) => user.userId === this.userId);
+        }
+        // Use API data
         try {
             const response = await fetch(`${this.url}/user/${this.userId}/performance`);
             if (!response.ok) {

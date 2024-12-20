@@ -19,3 +19,15 @@ To start the development server:
 To build for production:
 
 ```npm run build```
+
+To switch between API data and mocked data:
+
+1. Open `src/App.jsx`
+2. Locate the line where `UserApi` is instantiated:
+   ```javascript
+   const userApi = new UserApi(userId, "http://localhost:3000", false);
+3. To use mocked data, change the third parameter to true:
+    ```javascript
+    const userApi = new UserApi(userId, "http://localhost:3000", true);
+4. To use API data, keep it as `false`
+
