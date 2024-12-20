@@ -28,6 +28,9 @@ export class UserApi {
                 throw new UserApiError(`Failed to fetch user data: ${response.status}`, response);
             }
             const data = await response.json();
+            if (data.data?.score) {
+                data.data.todayScore = data.data.score;
+            }
             return data.data;
         } catch (error) {
             if (error instanceof UserApiError) {
