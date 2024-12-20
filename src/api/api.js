@@ -25,7 +25,7 @@ export class UserApi {
         try {
             const response = await fetch(`${this.url}/user/${this.userId}`);
             if (!response.ok) {
-                throw new UserApiError(`Failed to fetch user data: ${response.status}`, response);
+                throw new UserApiError(`Impossible de récupérer les données utilisateur: ${response.status}`, response);
             }
             const data = await response.json();
             if (data.data?.score) {
@@ -36,7 +36,7 @@ export class UserApi {
             if (error instanceof UserApiError) {
                 throw error;
             }
-            throw new UserApiError('Error fetching user data', error);
+            throw new UserApiError('Erreur lors de la récupération des données utilisateur', error);
         }
     }
     /**
@@ -56,7 +56,7 @@ export class UserApi {
         try {
             const response = await fetch(`${this.url}/user/${this.userId}/activity`);
             if (!response.ok) {
-                throw new UserApiError(`Failed to fetch activity data: ${response.status}`, response);
+                throw new UserApiError(`Impossible de récupérer les données de l'activité: ${response.status}`, response);
             }
             const data = await response.json();
             return data.data;
@@ -64,7 +64,7 @@ export class UserApi {
             if (error instanceof UserApiError) {
                 throw error;
             }
-            throw new UserApiError('Error fetching user activity data', error);
+            throw new UserApiError('Erreur lors de la récupération des données de l\'activité', error);
         }
     }
     /**
@@ -83,7 +83,7 @@ export class UserApi {
         try {
             const response = await fetch(`${this.url}/user/${this.userId}/average-sessions`);
             if (!response.ok) {
-                throw new UserApiError(`Failed to fetch average sessions data: ${response.status}`, response);
+                throw new UserApiError(`Impossible de récupérer les données des sessions: ${response.status}`, response);
             }
             const data = await response.json();
             return data.data;
@@ -91,7 +91,7 @@ export class UserApi {
             if (error instanceof UserApiError) {
                 throw error;
             }
-            throw new UserApiError('Error fetching user average sessions data', error);
+            throw new UserApiError('Erreur lors de la récupération des données des sessions', error);
         }
     }
 
@@ -111,7 +111,7 @@ export class UserApi {
         try {
             const response = await fetch(`${this.url}/user/${this.userId}/performance`);
             if (!response.ok) {
-                throw new UserApiError(`Failed to fetch performance data: ${response.status}`, response);
+                throw new UserApiError(`Impossible de récupérer les données de performances: ${response.status}`, response);
             }
             const data = await response.json();
             return data.data;
@@ -119,7 +119,7 @@ export class UserApi {
             if (error instanceof UserApiError) {
                 throw error;
             }
-            throw new UserApiError('Error fetching user performance data', error);
+            throw new UserApiError('Erreur lors de la récupération des données de performances', error);
         }
     }
 }

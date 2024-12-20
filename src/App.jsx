@@ -17,6 +17,7 @@ function App() {
   const [userActivity, setUserActivity] = useState(null);
   const [userAverageSessions, setUserAverageSessions] = useState(null);
   const [userPerformance, setUserPerformance] = useState();
+  const [error, setError] = useState(null);
   const userApi = new UserApi(userId, "http://localhost:3000");
 
   useEffect(() => {
@@ -34,6 +35,7 @@ function App() {
         setUserAverageSessions(sessionsData);
         setUserPerformance(performanceData);
       } catch (error) {
+        setError(error);
         console.error("Error fetching data:", error);
       }
     }
@@ -48,98 +50,102 @@ function App() {
       <Header />
       <main>
         <SideNav />
-        <section className="main-content">
-          <h1>
-            Bonjour <span>{userData?.userInfos.firstName}</span>
-          </h1>
-          <h3>Félicitation ! Vous avez explosé vos objectifs hier 👏</h3>
-          <section className="charts">
-            <div className="container">
-              <div className="flex-col">
-                <div className="left-top chart">
-                  {userActivity?.sessions && (
-                    <BarChartComponent
-                      chartData={userActivity.sessions}
-                      options={{
-                        title: "Activité quotidienne",
-                        width: 835,
-                        height: 320,
-                      }}
-                    />
-                  )}
+        {error ? (
+          <div className="error-message">Erreur <span>{error.message}</span></div>
+        ) : (
+          <section className="main-content">
+            <h1>
+              Bonjour <span>{userData?.userInfos.firstName}</span>
+            </h1>
+            <h3>Félicitation ! Vous avez explosé vos objectifs hier 👏</h3>
+            <section className="charts">
+              <div className="container">
+                <div className="flex-col">
+                  <div className="left-top chart">
+                    {userActivity?.sessions && (
+                      <BarChartComponent
+                        chartData={userActivity.sessions}
+                        options={{
+                          title: "Activité quotidienne",
+                          width: 835,
+                          height: 320,
+                        }}
+                      />
+                    )}
+                  </div>
+                  <div className="left-bottom">
+                    <div className="first chart">
+                      {userAverageSessions?.sessions && (
+                        <LineChartComponent
+                          chartData={userAverageSessions.sessions}
+                          options={{
+                            title: "Durée moyenne des sessions",
+                            width: 258,
+                            height: 263,
+                          }}
+                        />
+                      )}
+                    </div>
+                    <div className="second chart">
+                      {userPerformance && (
+                        <RadarChartComponent
+                          chartData={userPerformance}
+                          options={{
+                            width: 258,
+                            height: 263,
+                          }}
+                        />
+                      )}
+                    </div>
+                    <div className="third chart">
+                      {userData?.todayScore && (
+                        <ProgressChartComponent
+                          chartData={userData.todayScore}
+                          options={{
+                            title: "Score",
+                            width: 258,
+                            height: 263,
+                          }}
+                        />
+                      )}
+                    </div>
+                  </div>
                 </div>
-                <div className="left-bottom">
-                  <div className="first chart">
-                    {userAverageSessions?.sessions && (
-                      <LineChartComponent
-                        chartData={userAverageSessions.sessions}
-                        options={{
-                          title: "Durée moyenne des sessions",
-                          width: 258,
-                          height: 263,
-                        }}
-                      />
-                    )}
+                <div className="flex-col right-col">
+                  <div className="calories chart">
+                    <IconCalories />
+                    <div>
+                      {userData?.keyData.calorieCount}kCal
+                      <br />
+                      <span>Calories</span>
+                    </div>
                   </div>
-                  <div className="second chart">
-                    {userPerformance && (
-                      <RadarChartComponent
-                        chartData={userPerformance}
-                        options={{
-                          width: 258,
-                          height: 263,
-                        }}
-                      />
-                    )}
+                  <div className="proteins chart">
+                    <IconProteins />
+                    <div>
+                      {userData?.keyData.proteinCount}g<br />
+                      <span>Proteines</span>
+                    </div>
                   </div>
-                  <div className="third chart">
-                    {userData?.todayScore && (
-                      <ProgressChartComponent
-                        chartData={userData.todayScore}
-                        options={{
-                          title: "Score",
-                          width: 258,
-                          height: 263,
-                        }}
-                      />
-                    )}
+                  <div className="carbohydrates chart">
+                    <IconCarbohydrates />
+                    <div>
+                      {userData?.keyData.carbohydrateCount}g<br />
+                      <span>Glucides</span>
+                    </div>
+                  </div>
+                  <div className="lipids chart">
+                    <IconLipids />
+                    <div>
+                      {userData?.keyData.lipidCount}g<br />
+                      <span>Lipides</span>
+                    </div>
                   </div>
                 </div>
               </div>
-              <div className="flex-col right-col">
-                <div className="calories chart">
-                  <IconCalories />
-                  <div>
-                    {userData?.keyData.calorieCount}kCal
-                    <br />
-                    <span>Calories</span>
-                  </div>
-                </div>
-                <div className="proteins chart">
-                  <IconProteins />
-                  <div>
-                    {userData?.keyData.proteinCount}g<br />
-                    <span>Proteines</span>
-                  </div>
-                </div>
-                <div className="carbohydrates chart">
-                  <IconCarbohydrates />
-                  <div>
-                    {userData?.keyData.carbohydrateCount}g<br />
-                    <span>Glucides</span>
-                  </div>
-                </div>
-                <div className="lipids chart">
-                  <IconLipids />
-                  <div>
-                    {userData?.keyData.lipidCount}g<br />
-                    <span>Lipides</span>
-                  </div>
-                </div>
-              </div>
-            </div>
+            </section>
           </section>
-        </section>
+        )}
       </main>
     </div>
   );
